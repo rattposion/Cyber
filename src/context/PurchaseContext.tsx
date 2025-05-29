@@ -32,7 +32,7 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
 
   // Simular recebimento de compras do servidor
   useEffect(() => {
-    const wsUrl = 'wss://backcyber-production.up.railway.app';
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://backcyber-production.up.railway.app';
     console.log('Tentando conectar ao WebSocket:', wsUrl);
     
     const ws = new WebSocket(wsUrl);

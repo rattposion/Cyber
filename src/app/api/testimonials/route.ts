@@ -1,22 +1,25 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const testimonials = await prisma.testimonial.findMany({
-      orderBy: {
-        createdAt: 'desc',
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/testimonials`, {
+      headers: {
+        'Content-Type': 'application/json',
       },
-      take: 6,
     });
 
+    if (!response.ok) {
+      throw new Error('Erro ao buscar depoimentos do backend');
+    }
+
+    const testimonials = await response.json();
     return NextResponse.json(testimonials);
   } catch (error) {
-    console.error('Erro na API de depoimentos:', error);
+    console.error('Erro ao buscar depoimentos:', error);
     return NextResponse.json(
-      { error: 'Erro ao buscar depoimentos' },
+      { error: 'Erro interno ao buscar depoimentos' },
       { status: 500 }
     );
   }

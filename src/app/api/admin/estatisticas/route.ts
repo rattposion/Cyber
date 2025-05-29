@@ -1,49 +1,25 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded || !decoded.isAdmin) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const [totalUsers, totalProducts, totalPedidos] = await Promise.all([
-      prisma.user.count(),
-      prisma.produto.count(),
-      prisma.pedido.count(),
-    ]);
-
-    const pedidosRecentes = await prisma.pedido.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            username: true,
-          },
-        },
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/estatisticas`, {
+      headers: {
+        'Content-Type': 'application/json',
       },
     });
 
-    return NextResponse.json({
-      totalUsers,
-      totalProducts,
-      totalPedidos,
-      pedidosRecentes,
-    });
+    if (!response.ok) {
+      throw new Error('Erro ao buscar estatísticas do backend');
+    }
+
+    const estatisticas = await response.json();
+    return NextResponse.json(estatisticas);
   } catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
     return NextResponse.json(
-      { error: 'Erro ao buscar estatísticas' },
+      { error: 'Erro interno ao buscar estatísticas' },
       { status: 500 }
     );
   }
