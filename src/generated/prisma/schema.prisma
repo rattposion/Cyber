@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model compra {
+  id        Int      @id @default(autoincrement())
+  produto   String
+  comprador String
+  preco     Float
+  timestamp DateTime @default(now())
+
+  @@index([comprador], map: "Compra_comprador_idx")
+}
+
+model pagamento {
+  id        Int      @id @default(autoincrement())
+  pedidoId  Int
+  valor     Float
+  metodo    String
+  status    String   @default("pendente")
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    Int
+  pedido    pedido   @relation(fields: [pedidoId], references: [id], map: "Pagamento_pedidoId_fkey")
+  user      user     @relation(fields: [userId], references: [id], map: "Pagamento_userId_fkey")
+
+  @@index([pedidoId], map: "Pagamento_pedidoId_fkey")
+  @@index([userId], map: "Pagamento_userId_fkey")
+}
+
+model payment {
+  id              Int           @id @default(autoincrement())
+  transactionCode String        @unique(map: "Payment_transactionCode_key")
+  status          String
+  amount          Float
+  reference       String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime
+  userId          Int
+  user            user          @relation(fields: [userId], references: [id], map: "Payment_userId_fkey")
+  paymentitem     paymentitem[]
+
+  @@index([userId], map: "Payment_userId_fkey")
+}
+
+model paymentitem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  paymentId Int
+  productId Int
+  payment   payment  @relation(fields: [paymentId], references: [id], map: "PaymentItem_paymentId_fkey")
+  products  products @relation(fields: [productId], references: [id], map: "PaymentItem_productId_fkey")
+
+  @@index([paymentId], map: "PaymentItem_paymentId_fkey")
+  @@index([productId], map: "PaymentItem_productId_fkey")
+}
+
+model pedido {
+  id         Int         @id @default(autoincrement())
+  produtoId  Int
+  quantidade Int
+  endereco   String
+  status     String      @default("pendente")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime
+  userId     Int
+  pagamento  pagamento[]
+  produto    produto     @relation(fields: [produtoId], references: [id], map: "Pedido_produtoId_fkey")
+  user       user        @relation(fields: [userId], references: [id], map: "Pedido_userId_fkey")
+
+  @@index([produtoId], map: "Pedido_produtoId_fkey")
+  @@index([userId], map: "Pedido_userId_fkey")
+}
+
+model products {
+  id          Int           @id @default(autoincrement())
+  nome        String
+  descricao   String        @db.Text
+  preco       Float
+  imagem      String
+  categoria   String
+  status      String        @default("ATIVO")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  paymentitem paymentitem[]
+  testimonial testimonial[]
+}
+
+model produto {
+  id            Int        @id @default(autoincrement())
+  nome          String
+  descricao     String?
+  preco         Float
+  preco1d       Float
+  preco7d       Float
+  preco30d      Float
+  precoLifetime Float
+  tipoUso       String
+  estoque       Int        @default(0)
+  imagem        String?
+  status        String     @default("ATIVO")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  userId        Int
+  categoriaId   Int?
+  pedido        pedido[]
+  user          user       @relation(fields: [userId], references: [id], map: "Produto_userId_fkey")
+  categoria     categoria? @relation(fields: [categoriaId], references: [id], map: "Produto_categoriaId_fkey")
+
+  @@index([userId], map: "Produto_userId_fkey")
+  @@index([categoriaId], map: "Produto_categoriaId_fkey")
+}
+
+model testimonial {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  productId Int
+  products  products @relation(fields: [productId], references: [id], map: "Testimonial_productId_fkey")
+
+  @@index([productId], map: "Testimonial_productId_fkey")
+}
+
+model user {
+  id        Int         @id @default(autoincrement())
+  username  String      @unique(map: "User_username_key")
+  email     String      @unique(map: "User_email_key")
+  password  String
+  isAdmin   Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  pagamento pagamento[]
+  payment   payment[]
+  pedido    pedido[]
+  produto   produto[]
+}
+
+model categoria {
+  id       Int       @id @default(autoincrement())
+  nome     String    @unique
+  produtos produto[]
+}

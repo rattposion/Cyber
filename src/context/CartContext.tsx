@@ -1,0 +1,94 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  licenseType: 'Mensal' | 'Trimestral' | 'Anual';
+  image: string;
+}
+
+interface CartContextType {
+  items: CartItem[];
+  addItem: (item: CartItem) => void;
+  removeItem: (id: number) => void;
+  updateQuantity: (id: number, quantity: number) => void;
+  clearCart: () => void;
+  total: number;
+}
+
+const CartContext = createContext<CartContextType>({
+  items: [],
+  addItem: () => {},
+  removeItem: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
+  total: 0,
+});
+
+export const useCart = () => useContext(CartContext);
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+
+  // Carregar do localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('cybershop_cart');
+    if (stored) setItems(JSON.parse(stored));
+  }, []);
+
+  // Salvar no localStorage
+  useEffect(() => {
+    localStorage.setItem('cybershop_cart', JSON.stringify(items));
+  }, [items]);
+
+  const addItem = (item: CartItem) => {
+    setItems(prev => {
+      const existingItem = prev.find(i => i.id === item.id);
+      if (existingItem) {
+        return prev.map(i =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
+
+  const removeItem = (id: number) => {
+    setItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const updateQuantity = (id: number, quantity: number) => {
+    if (quantity < 1) return;
+    setItems(prev =>
+      prev.map(item => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
+  const clearCart = () => {
+    setItems([]);
+  };
+
+  const total = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  return (
+    <CartContext.Provider
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        total,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+} 
