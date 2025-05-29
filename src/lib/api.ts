@@ -369,6 +369,35 @@ export class ApiService {
       };
     }
   }
+
+  static async toggleProductEntrega(token: string, productId: number): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${API_URL}/api/admin/produtos/${productId}/toggle-entrega`, {
+        method: "POST",
+        headers: this.getHeaders(token),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || "Erro ao alterar status de entrega",
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      console.error("Erro ao alterar status de entrega:", error);
+      return {
+        success: false,
+        error: "Erro ao conectar com o servidor",
+      };
+    }
+  }
 }
 
 export default ApiService; 
