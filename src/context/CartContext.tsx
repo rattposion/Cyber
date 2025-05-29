@@ -36,13 +36,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Carregar do localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('cybershop_cart');
-    if (stored) setItems(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem('cybershop_cart');
+      if (stored) {
+        const parsedItems = JSON.parse(stored);
+        if (Array.isArray(parsedItems)) {
+          setItems(parsedItems);
+        } else {
+          console.error('Dados do carrinho inválidos');
+          localStorage.removeItem('cybershop_cart');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar carrinho:', error);
+      localStorage.removeItem('cybershop_cart');
+    }
   }, []);
 
   // Salvar no localStorage
   useEffect(() => {
-    localStorage.setItem('cybershop_cart', JSON.stringify(items));
+    try {
+      localStorage.setItem('cybershop_cart', JSON.stringify(items));
+    } catch (error) {
+      console.error('Erro ao salvar carrinho:', error);
+    }
   }, [items]);
 
   const addItem = (item: CartItem) => {
