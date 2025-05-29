@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,12 +6,17 @@ export async function GET() {
   try {
     console.log('Iniciando busca de produtos...');
     
-    const produtos = await prisma.produto.findMany({
-      include: {
-        categoria: true,
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/produtos`, {
+      headers: {
+        'Content-Type': 'application/json',
       },
     });
 
+    if (!response.ok) {
+      throw new Error('Erro ao buscar produtos do backend');
+    }
+
+    const produtos = await response.json();
     console.log('Produtos encontrados:', produtos.length);
     return NextResponse.json(produtos);
   } catch (error) {
