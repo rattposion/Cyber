@@ -87,7 +87,7 @@ export class ApiService {
 
   static async getAdminStats(token: string): Promise<ApiResponse<any>> {
     try {
-      const response = await fetch(`${API_URL}/api/admin/stats`, {
+      const response = await fetch(`${API_URL}/api/admin/estatisticas`, {
         headers: this.getHeaders(token),
       });
 
