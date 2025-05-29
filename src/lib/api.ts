@@ -342,6 +342,31 @@ export class ApiService {
       };
     }
   }
+
+  static async getTestimonials(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${API_URL}/api/testimonials`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || "Erro ao buscar depoimentos",
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      console.error("Erro ao buscar depoimentos:", error);
+      return {
+        success: false,
+        error: "Erro ao conectar com o servidor",
+      };
+    }
+  }
 }
 
 export default ApiService; 
