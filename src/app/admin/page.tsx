@@ -12,6 +12,8 @@ interface Statistics {
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
+  produtosAtivos: number;
+  pedidosPendentes: number;
 }
 
 interface User {
