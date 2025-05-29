@@ -38,6 +38,11 @@ const mockProducts = [
   { id: 3, name: "Template Loja Digital", price: 79.90 }
 ];
 
+const ensureNumber = (value: any): number => {
+  const num = Number(value);
+  return isNaN(num) ? 0 : num;
+};
+
 export default function CyberTerminal({ onCommand, initialOutputs, className }: CyberTerminalProps) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [outputs, setOutputs] = useState<TerminalOutput[]>(initialOutputs || []);
@@ -126,7 +131,7 @@ export default function CyberTerminal({ onCommand, initialOutputs, className }: 
         {purchasesRef.current.map((purchase) => (
           <div key={purchase.id} className="mb-2">
             <p className="text-[#39ff14] font-mono">
-              <span className="text-[#00eaff]">[{purchase.timestamp}]</span> {purchase.nickname} comprou {purchase.productName} por R$ {(Number(purchase.price) || 0).toFixed(2)}
+              <span className="text-[#00eaff]">[{purchase.timestamp}]</span> {purchase.nickname} comprou {purchase.productName} por R$ {ensureNumber(purchase.price).toFixed(2)}
             </p>
           </div>
         ))}

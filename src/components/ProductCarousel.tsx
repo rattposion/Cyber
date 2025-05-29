@@ -130,6 +130,11 @@ export default function ProductCarousel() {
     }
   };
 
+  const ensureNumber = (value: any): number => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   if (isLoading) {
     return (
       <div className="terminal-fake w-full h-[400px] md:h-[500px]">
@@ -204,7 +209,7 @@ export default function ProductCarousel() {
                   </h3>
                   <p className="text-gray-300 mb-4 text-lg">{product.description}</p>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[#39ff14] text-2xl font-bold">R$ {(Number(product.price) || 0).toFixed(2)}</span>
+                    <span className="text-[#39ff14] text-2xl font-bold">R$ {ensureNumber(product.price).toFixed(2)}</span>
                     <span className="text-[#00eaff] text-sm">ou em até 12x</span>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-4">

@@ -114,6 +114,11 @@ export default function AdminProdutos() {
     }
   };
 
+  const ensureNumber = (value: any): number => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   if (!user) return <p>Faça login como admin para acessar.</p>;
   if (!user.isAdmin) return <p>Acesso negado. Apenas administradores podem acessar esta página.</p>;
 
@@ -174,7 +179,7 @@ export default function AdminProdutos() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                  R$ {(Number(product.preco) || 0).toFixed(2)}
+                  R$ {ensureNumber(product.preco).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button

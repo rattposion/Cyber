@@ -314,6 +314,11 @@ export default function Produtos() {
     }
   }, [terminalLines]);
 
+  const ensureNumber = (value: any): number => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -415,7 +420,7 @@ export default function Produtos() {
                 <p className="text-[#ededed] mb-4 line-clamp-2 font-mono">{product.descricao}</p>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-2xl font-bold text-[#00eaff] font-mono">
-                    R$ {(Number(product.preco) || 0).toFixed(2)}
+                    R$ {ensureNumber(product.preco).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex gap-1 mb-3">

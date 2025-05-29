@@ -134,23 +134,35 @@ export default function AdminPage() {
         return;
       }
 
-      // Limpa e valida os dados
-      const cleanedStats = {
-        ...statsResponse.data,
-        totalRevenue: Number(statsResponse.data.totalRevenue) || 0
+      // Função auxiliar para garantir que um valor seja um número válido
+      const ensureNumber = (value: any): number => {
+        const num = Number(value);
+        return isNaN(num) ? 0 : num;
       };
 
-      const cleanedProducts = productsResponse.data.map((product: any) => ({
+      // Limpa e valida os dados
+      const cleanedStats = {
+        totalUsers: ensureNumber(statsResponse.data?.totalUsers),
+        totalProducts: ensureNumber(statsResponse.data?.totalProducts),
+        totalOrders: ensureNumber(statsResponse.data?.totalOrders),
+        totalRevenue: ensureNumber(statsResponse.data?.totalRevenue),
+        produtosAtivos: ensureNumber(statsResponse.data?.produtosAtivos),
+        pedidosPendentes: ensureNumber(statsResponse.data?.pedidosPendentes)
+      };
+
+      const cleanedProducts = (productsResponse.data || []).map((product: any) => ({
         ...product,
-        preco: Number(product.preco) || 0,
-        preco1d: Number(product.preco1d) || 0,
-        preco7d: Number(product.preco7d) || 0,
-        preco30d: Number(product.preco30d) || 0,
-        precoLifetime: Number(product.precoLifetime) || 0
+        preco: ensureNumber(product?.preco),
+        preco1d: ensureNumber(product?.preco1d),
+        preco7d: ensureNumber(product?.preco7d),
+        preco30d: ensureNumber(product?.preco30d),
+        precoLifetime: ensureNumber(product?.precoLifetime),
+        entregaAutomatica: Boolean(product?.entregaAutomatica),
+        status: product?.status || 'inativo'
       }));
 
       setStatistics(cleanedStats);
-      setUsers(usersResponse.data);
+      setUsers(usersResponse.data || []);
       setProducts(cleanedProducts);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
@@ -530,7 +542,7 @@ export default function AdminPage() {
                     <FaMoneyBillWave className="text-3xl text-[#39ff14]" />
                     <div>
                       <h3 className="text-lg font-semibold">Receita Total</h3>
-                      <p className="text-2xl">R$ {(Number(statistics.totalRevenue) || 0).toFixed(2)}</p>
+                      <p className="text-2xl">R$ {ensureNumber(statistics?.totalRevenue).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -630,7 +642,7 @@ export default function AdminPage() {
                         <tr key={p.id} className="border-b border-[#39ff14]/10">
                           <td className="p-4">{p.id}</td>
                           <td className="p-4">{p.nome}</td>
-                          <td className="p-4">R$ {(Number(p.preco) || 0).toFixed(2)}</td>
+                          <td className="p-4">R$ {ensureNumber(p.preco).toFixed(2)}</td>
                           <td className="p-4">
                             <span className={`px-2 py-1 rounded ${
                               p.status === 'ativo' ? 'bg-[#39ff14] text-black' : 'bg-red-500'

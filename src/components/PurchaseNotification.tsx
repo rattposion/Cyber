@@ -16,6 +16,11 @@ interface PurchaseNotificationProps {
   onClose: () => void;
 }
 
+const ensureNumber = (value: any): number => {
+  const num = Number(value);
+  return isNaN(num) ? 0 : num;
+};
+
 export const PurchaseNotification: React.FC<PurchaseNotificationProps> = ({ purchase, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,7 +56,7 @@ export const PurchaseNotification: React.FC<PurchaseNotificationProps> = ({ purc
               <span className="font-medium">{purchase.produto}</span>
             </p>
             <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-              R$ {(Number(purchase.preco) || 0).toFixed(2)}
+              R$ {ensureNumber(purchase.preco).toFixed(2)}
             </p>
           </div>
           <button
