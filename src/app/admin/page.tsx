@@ -134,9 +134,24 @@ export default function AdminPage() {
         return;
       }
 
-      setStatistics(statsResponse.data);
+      // Limpa e valida os dados
+      const cleanedStats = {
+        ...statsResponse.data,
+        totalRevenue: Number(statsResponse.data.totalRevenue) || 0
+      };
+
+      const cleanedProducts = productsResponse.data.map((product: any) => ({
+        ...product,
+        preco: Number(product.preco) || 0,
+        preco1d: Number(product.preco1d) || 0,
+        preco7d: Number(product.preco7d) || 0,
+        preco30d: Number(product.preco30d) || 0,
+        precoLifetime: Number(product.precoLifetime) || 0
+      }));
+
+      setStatistics(cleanedStats);
       setUsers(usersResponse.data);
-      setProducts(productsResponse.data);
+      setProducts(cleanedProducts);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
       setError("Erro ao carregar dados. Tente novamente.");

@@ -70,6 +70,11 @@ export default function ProdutoDetalhe({ params }: { params: { id: string } }) {
         // Limpa e valida os dados
         const cleanedProduct = {
           ...produtoEncontrado,
+          preco: Number(produtoEncontrado.preco) || 0,
+          preco1d: Number(produtoEncontrado.preco1d) || 0,
+          preco7d: Number(produtoEncontrado.preco7d) || 0,
+          preco30d: Number(produtoEncontrado.preco30d) || 0,
+          precoLifetime: Number(produtoEncontrado.precoLifetime) || 0,
           imagem: produtoEncontrado.imagem || '/placeholder.png',
           categoria: produtoEncontrado.categoria && typeof produtoEncontrado.categoria === 'object' && 'nome' in produtoEncontrado.categoria
             ? { id: produtoEncontrado.categoria.id, nome: produtoEncontrado.categoria.nome }

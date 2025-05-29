@@ -14,6 +14,10 @@ interface Product {
   nome: string;
   descricao: string;
   preco: number;
+  preco1d: number;
+  preco7d: number;
+  preco30d: number;
+  precoLifetime: number;
   imagem?: string;
   categoria?: {
     id: number;
@@ -52,6 +56,10 @@ export default function Produtos() {
       nome: "Produto de Demonstração",
       descricao: "Este é um produto de demonstração que aparece quando a API está indisponível.",
       preco: 99.99,
+      preco1d: 99.99,
+      preco7d: 99.99,
+      preco30d: 99.99,
+      precoLifetime: 99.99,
       categoria: { id: 1, nome: "Demonstração" }
     }
   ];
@@ -163,6 +171,11 @@ export default function Produtos() {
       // Limpa e valida os dados
       const cleanedData = data.map(product => ({
         ...product,
+        preco: Number(product.preco) || 0,
+        preco1d: Number(product.preco1d) || 0,
+        preco7d: Number(product.preco7d) || 0,
+        preco30d: Number(product.preco30d) || 0,
+        precoLifetime: Number(product.precoLifetime) || 0,
         categoria: product.categoria && typeof product.categoria === 'object' && 'nome' in product.categoria
           ? { id: product.categoria.id, nome: product.categoria.nome }
           : null
