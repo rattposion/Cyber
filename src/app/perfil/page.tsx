@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import CyberProfileTerminal from '@/components/CyberProfileTerminal';
 import BackgroundEffects from '@/components/BackgroundEffects';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import '../login/styles.css';
 
 interface Pedido {
@@ -28,36 +28,48 @@ export default function Perfil() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchPedidos = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const res = await fetch("/api/pedidos", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        throw new Error("Erro ao carregar pedidos");
+      }
+      const data = await res.json();
+      setPedidos(data);
+    } catch (err) {
+      setError("Erro ao carregar pedidos");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, router]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login");
       return;
     }
 
-    const fetchPedidos = async () => {
-      try {
-        const res = await fetch("/api/pedidos", {
-          headers: { Authorization: token ? `Bearer ${token}` : "" },
-        });
-        if (!res.ok) {
-          if (res.status === 401) {
-            router.push("/login");
-            return;
-          }
-          throw new Error("Erro ao carregar pedidos");
-        }
-        const data = await res.json();
-        setPedidos(data);
-      } catch (err) {
-        setError("Erro ao carregar pedidos");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    let mounted = true;
+
+    const loadPedidos = async () => {
+      await fetchPedidos();
     };
 
-    fetchPedidos();
-  }, [isAuthenticated, router, token]);
+    loadPedidos();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, router, fetchPedidos]);
 
   useEffect(() => {
     setLoginTime(new Date().toLocaleString('pt-BR'));
@@ -120,19 +132,8 @@ export default function Perfil() {
       '----------------------------------------'
     ]);
     try {
-      const res = await fetch('/api/pedidos', {
-        headers: { Authorization: token ? `Bearer ${token}` : '' }
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          setTerminalLines(['Sessão expirada. Faça login novamente para visualizar seus pedidos.']);
-          return;
-        }
-        const errorText = await res.text();
-        throw new Error(errorText || 'Erro desconhecido');
-      }
-      const data = await res.json();
-      const pedidos = Array.isArray(data) ? data : data.pedidos || [];
+      await fetchPedidos();
+      
       if (!pedidos.length) {
         setTerminalLines([
           'Últimas transações:',
@@ -141,7 +142,7 @@ export default function Perfil() {
         ]);
         return;
       }
-      setPedidos(pedidos);
+
       setTerminalLines([
         'Últimas transações:',
         '----------------------------------------',
