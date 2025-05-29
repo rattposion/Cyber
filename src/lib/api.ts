@@ -227,12 +227,14 @@ export class ApiService {
     }
   }
 
-  static async createProduct(token: string, productData: any): Promise<ApiResponse<any>> {
+  static async createProduct(token: string, formData: FormData): Promise<ApiResponse<any>> {
     try {
       const response = await fetch(`${API_URL}/api/admin/produtos`, {
         method: "POST",
-        headers: this.getHeaders(token),
-        body: JSON.stringify(productData),
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData,
       });
 
       const data = await response.json();
@@ -240,7 +242,7 @@ export class ApiService {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || "Erro ao criar produto",
+          error: data.error || "Erro ao criar produto",
         };
       }
 

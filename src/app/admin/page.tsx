@@ -31,6 +31,7 @@ interface Product {
   status: string;
   createdAt: string;
   destaque?: boolean;
+  entregaAutomatica: boolean;
 }
 
 interface Categoria {
@@ -244,14 +245,14 @@ export default function AdminPage() {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!token) {
-      setError('Token não disponível');
+    if (!token || !user) {
+      setError('Token ou usuário não disponível');
       return;
     }
 
     try {
       // Validar campos obrigatórios
-      const camposObrigatorios = ['nome', 'preco', 'tipoUso'] as const;
+      const camposObrigatorios = ['nome', 'preco', 'tipoUso', 'categoriaId'] as const;
       const camposFaltando = camposObrigatorios.filter(campo => !createForm[campo]);
       
       if (camposFaltando.length > 0) {
@@ -265,20 +266,19 @@ export default function AdminPage() {
 
       const formData = new FormData();
       formData.append('nome', createForm.nome);
+      formData.append('descricao', createForm.descricao);
       formData.append('preco', createForm.preco.toString());
       formData.append('tipoUso', createForm.tipoUso);
+      formData.append('categoriaId', createForm.categoriaId);
+      formData.append('status', createForm.status);
       formData.append('file', createForm.imagem);
+      formData.append('userId', user.id.toString());
 
-      // Adicionar todos os campos de preço, mesmo que vazios
+      // Adicionar todos os campos de preço
       formData.append('preco1d', createForm.preco1d.toString());
       formData.append('preco7d', createForm.preco7d.toString());
       formData.append('preco30d', createForm.preco30d.toString());
       formData.append('precoLifetime', createForm.precoLifetime.toString());
-
-      // Adicionar campos opcionais
-      if (createForm.descricao) formData.append('descricao', createForm.descricao);
-      if (createForm.categoriaId) formData.append('categoriaId', createForm.categoriaId);
-      if (createForm.status) formData.append('status', createForm.status);
 
       const response = await ApiService.createProduct(token, formData);
 
@@ -314,6 +314,13 @@ export default function AdminPage() {
       }
     }
   };
+
+  // Adicionar useEffect para carregar categorias quando o modal é aberto
+  useEffect(() => {
+    if (showCreateModal) {
+      fetchCategorias();
+    }
+  }, [showCreateModal]);
 
   // Atualizar os handlers de input para converter strings em números
   const handlePrecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -405,6 +412,30 @@ export default function AdminPage() {
       setCategoryLoading(false);
     }
   }
+
+  const handleToggleEntrega = async (productId: number) => {
+    if (!token) {
+      setError("Token não disponível");
+      return;
+    }
+
+    try {
+      const response = await ApiService.toggleProductEntrega(token, productId);
+
+      if (response.error) {
+        setError(response.error);
+        return;
+      }
+
+      // Atualizar lista de produtos
+      setProducts(products.map(p => 
+        p.id === productId ? { ...p, entregaAutomatica: !p.entregaAutomatica } : p
+      ));
+    } catch (error) {
+      console.error('Erro:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao atualizar entrega');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a1a] text-white p-8">
@@ -558,6 +589,7 @@ export default function AdminPage() {
                         <th className="text-left p-4">Nome</th>
                         <th className="text-left p-4">Preço</th>
                         <th className="text-left p-4">Status</th>
+                        <th className="text-left p-4">Entrega Auto</th>
                         <th className="text-left p-4">Data de Criação</th>
                         <th className="text-left p-4">Ações</th>
                       </tr>
@@ -574,6 +606,16 @@ export default function AdminPage() {
                             }`}>
                               {p.status}
                             </span>
+                          </td>
+                          <td className="p-4">
+                            <button
+                              onClick={() => handleToggleEntrega(p.id)}
+                              className={`px-2 py-1 rounded ${
+                                p.entregaAutomatica ? 'bg-[#39ff14] text-black' : 'bg-gray-600'
+                              }`}
+                            >
+                              {p.entregaAutomatica ? 'Sim' : 'Não'}
+                            </button>
                           </td>
                           <td className="p-4">{new Date(p.createdAt).toLocaleDateString()}</td>
                           <td className="p-4">
@@ -638,6 +680,166 @@ export default function AdminPage() {
                     </p>
                   )}
                 </form>
+              </div>
+            )}
+
+            {/* Modal de Criação de Produto */}
+            {showCreateModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-[#181828] p-6 rounded-lg w-full max-w-2xl">
+                  <h2 className="text-2xl mb-4">Novo Produto</h2>
+                  <form onSubmit={handleCreateProduct} className="space-y-4">
+                    <div>
+                      <label className="block mb-2">Nome</label>
+                      <input
+                        type="text"
+                        value={createForm.nome}
+                        onChange={(e) => setCreateForm(prev => ({ ...prev, nome: e.target.value }))}
+                        className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block mb-2">Descrição</label>
+                      <textarea
+                        value={createForm.descricao}
+                        onChange={(e) => setCreateForm(prev => ({ ...prev, descricao: e.target.value }))}
+                        className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2 h-32"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block mb-2">Preço Base</label>
+                        <input
+                          type="number"
+                          value={createForm.preco}
+                          onChange={handlePrecoChange}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block mb-2">Categoria</label>
+                        <select
+                          value={createForm.categoriaId}
+                          onChange={(e) => setCreateForm(prev => ({ ...prev, categoriaId: e.target.value }))}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                          required
+                        >
+                          <option value="">Selecione uma categoria</option>
+                          {categorias.map((categoria) => (
+                            <option key={categoria.id} value={categoria.id}>
+                              {categoria.nome}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block mb-2">Preço 1 Dia</label>
+                        <input
+                          type="number"
+                          value={createForm.preco1d}
+                          onChange={handlePreco1dChange}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block mb-2">Preço 7 Dias</label>
+                        <input
+                          type="number"
+                          value={createForm.preco7d}
+                          onChange={handlePreco7dChange}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block mb-2">Preço 30 Dias</label>
+                        <input
+                          type="number"
+                          value={createForm.preco30d}
+                          onChange={handlePreco30dChange}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block mb-2">Preço Lifetime</label>
+                        <input
+                          type="number"
+                          value={createForm.precoLifetime}
+                          onChange={handlePrecoLifetimeChange}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block mb-2">Tipo de Uso</label>
+                        <select
+                          value={createForm.tipoUso}
+                          onChange={(e) => setCreateForm(prev => ({ ...prev, tipoUso: e.target.value }))}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                          required
+                        >
+                          <option value="1d">1 Dia</option>
+                          <option value="7d">7 Dias</option>
+                          <option value="30d">30 Dias</option>
+                          <option value="lifetime">Lifetime</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block mb-2">Status</label>
+                        <select
+                          value={createForm.status}
+                          onChange={(e) => setCreateForm(prev => ({ ...prev, status: e.target.value }))}
+                          className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                          required
+                        >
+                          <option value="ativo">Ativo</option>
+                          <option value="inativo">Inativo</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block mb-2">Imagem</label>
+                      <input
+                        type="file"
+                        onChange={(e) => setCreateForm(prev => ({ ...prev, imagem: e.target.files?.[0] || null }))}
+                        className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        accept="image/*"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateModal(false)}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-[#39ff14] text-black rounded-lg hover:bg-[#39ff14]/80"
+                      >
+                        Criar Produto
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
           </div>
