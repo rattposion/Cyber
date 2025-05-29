@@ -51,7 +51,7 @@ export const PurchaseNotification: React.FC<PurchaseNotificationProps> = ({ purc
               <span className="font-medium">{purchase.produto}</span>
             </p>
             <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-              R$ {purchase.preco.toFixed(2)}
+              R$ {(Number(purchase.preco) || 0).toFixed(2)}
             </p>
           </div>
           <button

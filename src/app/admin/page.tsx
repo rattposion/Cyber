@@ -515,7 +515,7 @@ export default function AdminPage() {
                     <FaMoneyBillWave className="text-3xl text-[#39ff14]" />
                     <div>
                       <h3 className="text-lg font-semibold">Receita Total</h3>
-                      <p className="text-2xl">R$ {statistics.totalRevenue.toFixed(2)}</p>
+                      <p className="text-2xl">R$ {(Number(statistics.totalRevenue) || 0).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -615,7 +615,7 @@ export default function AdminPage() {
                         <tr key={p.id} className="border-b border-[#39ff14]/10">
                           <td className="p-4">{p.id}</td>
                           <td className="p-4">{p.nome}</td>
-                          <td className="p-4">R$ {p.preco.toFixed(2)}</td>
+                          <td className="p-4">R$ {(Number(p.preco) || 0).toFixed(2)}</td>
                           <td className="p-4">
                             <span className={`px-2 py-1 rounded ${
                               p.status === 'ativo' ? 'bg-[#39ff14] text-black' : 'bg-red-500'

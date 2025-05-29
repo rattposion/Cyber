@@ -176,7 +176,7 @@ export default function ProdutoDetalhe({ params }: { params: { id: string } }) {
             </h1>
             <p className="text-[#ededed] mb-6 font-mono">{product.descricao}</p>
             <div className="text-3xl font-bold text-[#00eaff] mb-6 font-mono">
-              R$ {getPreco().toFixed(2)}
+              R$ {(Number(getPreco()) || 0).toFixed(2)}
             </div>
             <div className="flex gap-4 mb-6">
               <button

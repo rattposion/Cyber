@@ -174,7 +174,7 @@ export default function AdminProdutos() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                  R$ {product.preco.toFixed(2)}
+                  R$ {(Number(product.preco) || 0).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button

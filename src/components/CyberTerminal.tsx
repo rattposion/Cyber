@@ -126,7 +126,7 @@ export default function CyberTerminal({ onCommand, initialOutputs, className }: 
         {purchasesRef.current.map((purchase) => (
           <div key={purchase.id} className="mb-2">
             <p className="text-[#39ff14] font-mono">
-              <span className="text-[#00eaff]">[{purchase.timestamp}]</span> {purchase.nickname} comprou {purchase.productName} por R$ {purchase.price.toFixed(2)}
+              <span className="text-[#00eaff]">[{purchase.timestamp}]</span> {purchase.nickname} comprou {purchase.productName} por R$ {(Number(purchase.price) || 0).toFixed(2)}
             </p>
           </div>
         ))}

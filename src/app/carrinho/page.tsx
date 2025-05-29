@@ -107,7 +107,7 @@ export default function Carrinho() {
                   </div>
                   <div className="text-right">
                     <p className="text-[#00eaff] font-mono">
-                      R$ {(getPreco(item) * item.quantity).toFixed(2)}
+                      R$ {(Number(getPreco(item) * item.quantity) || 0).toFixed(2)}
                     </p>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -129,7 +129,7 @@ export default function Carrinho() {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-[#ededed] font-mono">
                   <span>Subtotal</span>
-                  <span>R$ {total.toFixed(2)}</span>
+                  <span>R$ {(Number(total) || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-[#ededed] font-mono">
                   <span>Taxas</span>
@@ -138,7 +138,7 @@ export default function Carrinho() {
                 <div className="border-t border-[#39ff14]/20 my-4"></div>
                 <div className="flex justify-between text-[#39ff14] font-bold font-mono">
                   <span>Total</span>
-                  <span>R$ {total.toFixed(2)}</span>
+                  <span>R$ {(Number(total) || 0).toFixed(2)}</span>
                 </div>
               </div>
               <div className="bg-yellow-500/10 border border-yellow-500 text-yellow-500 p-4 rounded-lg text-center">
