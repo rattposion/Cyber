@@ -23,13 +23,13 @@ export default function LoginPage() {
   const [command, setCommand] = useState("");
   const [output, setOutput] = useState<string[]>([]);
   const router = useRouter();
-  const loginCtx = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
-    if (loginCtx.isAuthenticated) {
-      router.push(loginCtx.user?.isAdmin ? "/admin" : "/");
+    if (isAuthenticated) {
+      router.push(user?.isAdmin ? "/admin" : "/");
     }
-  }, [loginCtx.isAuthenticated, loginCtx.user?.isAdmin, router]);
+  }, [isAuthenticated, user?.isAdmin, router]);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -51,7 +51,7 @@ export default function LoginPage() {
       }
 
       if (response.data) {
-        loginCtx.login(response.data);
+        login(response.data);
         setOutput(prev => [
           ...prev,
           "> Login realizado com sucesso!",
@@ -98,7 +98,7 @@ export default function LoginPage() {
     }
   };
 
-  if (loginCtx.isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black/90">
         <div className="text-[#39ff14] font-mono">
@@ -123,7 +123,8 @@ export default function LoginPage() {
             <span className="terminal-title cyber-glow text-lg md:text-xl glitch" data-text="Cyber Terminal v1.0">Cyber Terminal v1.0</span>
             <div />
           </div>
-          <div className="p-6 flex flex-col gap-4">
+          
+          <div className="p-6">
             <p className="text-sm mb-2 text-[#ededed] text-center">Digite 'help' para ver os comandos disponíveis</p>
             <div className="terminal-content bg-[#181828]/90 p-4 rounded mb-4 h-56 md:h-48 overflow-y-auto font-mono text-base md:text-lg" style={{minHeight: '180px'}}>
               {output.map((line, i) => (
@@ -143,6 +144,7 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             </div>
+            
             <form
               onSubmit={e => {
                 e.preventDefault();
@@ -175,14 +177,13 @@ export default function LoginPage() {
                 {isLoading ? "ENTRANDO..." : "ENTRAR"}
               </button>
             </form>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-[#ededed]">
-                Não tem uma conta?{" "}
-                <Link href="/registro" className="text-green-400 hover:text-green-300 font-bold underline underline-offset-2">
-                  Registre-se
-                </Link>
-              </p>
-            </div>
+            
+            <p className="text-sm text-[#ededed] mt-4">
+              Não tem uma conta?{" "}
+              <Link href="/registro" className="text-green-400 hover:text-green-300 font-bold underline underline-offset-2">
+                Registre-se
+              </Link>
+            </p>
           </div>
         </div>
         <footer className="mt-6 text-xs text-[#666] text-center w-full opacity-70 select-none">

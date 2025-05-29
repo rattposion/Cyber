@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://cyber-lovat-psi.vercel.app";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -8,7 +8,7 @@ interface ApiResponse<T> {
 
 export class ApiService {
   private static getHeaders(token?: string) {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
@@ -55,7 +55,7 @@ export class ApiService {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || "Erro ao fazer login",
+          error: data.error || "Erro ao fazer login",
         };
       }
 
@@ -69,9 +69,11 @@ export class ApiService {
       return {
         success: true,
         data: {
-          ...data,
-          token: data.token,
-          isAdmin: data.isAdmin || false,
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          isAdmin: data.isAdmin,
+          token: data.token
         },
       };
     } catch (error) {
