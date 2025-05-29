@@ -23,6 +23,16 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Ignorar erros de módulos não encontrados
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+    return config;
+  },
   async headers() {
     return [
       {
@@ -30,7 +40,7 @@ const nextConfig = {
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
         ],
       },
@@ -40,9 +50,11 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NODE_ENV === 'production' 
-          ? 'https://backcyber-production.up.railway.app/api/:path*'
-          : 'http://localhost:3001/api/:path*',
+        destination: 'https://backcyber-production.up.railway.app/api/:path*',
+      },
+      {
+        source: '/uploads/:path*',
+        destination: 'https://backcyber-production.up.railway.app/uploads/:path*',
       },
     ];
   },

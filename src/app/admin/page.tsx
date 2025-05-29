@@ -385,7 +385,7 @@ export default function AdminPage() {
     }
   }
 
-  async function handleCreateCategory(e: React.FormEvent) {
+  const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setCategoryMsg('');
     setCategoryLoading(true);
@@ -397,10 +397,18 @@ export default function AdminPage() {
     }
 
     try {
-      const response = await ApiService.createCategory(token, categoryName);
+      const response = await fetch('/api/admin/categorias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ nome: categoryName })
+      });
 
-      if (response.error) {
-        throw new Error(response.error);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao criar categoria');
       }
 
       setCategoryMsg('Categoria criada com sucesso!');
@@ -411,7 +419,7 @@ export default function AdminPage() {
     } finally {
       setCategoryLoading(false);
     }
-  }
+  };
 
   const handleToggleEntrega = async (productId: number) => {
     if (!token) {
@@ -574,12 +582,20 @@ export default function AdminPage() {
               <div className="bg-[#181828] rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl">Gerenciar Produtos</h2>
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="bg-[#39ff14] text-black px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#39ff14]/80"
-                  >
-                    <FaPlus /> Novo Produto
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      className="bg-[#39ff14] text-black px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#39ff14]/80"
+                    >
+                      <FaPlus /> Novo Produto
+                    </button>
+                    <button
+                      onClick={() => setShowCreateCategoryModal(true)}
+                      className="bg-[#8f00ff] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#8f00ff]/80"
+                    >
+                      <FaPlus /> Nova Categoria
+                    </button>
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -836,6 +852,54 @@ export default function AdminPage() {
                         className="px-4 py-2 bg-[#39ff14] text-black rounded-lg hover:bg-[#39ff14]/80"
                       >
                         Criar Produto
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Modal de Criação de Categoria */}
+            {showCreateCategoryModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-[#181828] p-6 rounded-lg w-full max-w-md">
+                  <h2 className="text-2xl mb-4">Nova Categoria</h2>
+                  <form onSubmit={handleCreateCategory} className="space-y-4">
+                    <div>
+                      <label className="block mb-2">Nome da Categoria</label>
+                      <input
+                        type="text"
+                        value={categoryName}
+                        onChange={(e) => setCategoryName(e.target.value)}
+                        className="w-full bg-[#0a0a1a] border border-[#39ff14]/30 rounded-lg p-2"
+                        required
+                      />
+                    </div>
+
+                    {categoryMsg && (
+                      <p className={`text-sm ${categoryMsg.includes('sucesso') ? 'text-[#39ff14]' : 'text-red-500'}`}>
+                        {categoryMsg}
+                      </p>
+                    )}
+
+                    <div className="flex justify-end gap-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowCreateCategoryModal(false);
+                          setCategoryName('');
+                          setCategoryMsg('');
+                        }}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={categoryLoading}
+                        className="px-4 py-2 bg-[#8f00ff] text-white rounded-lg hover:bg-[#8f00ff]/80 disabled:opacity-50"
+                      >
+                        {categoryLoading ? 'Criando...' : 'Criar Categoria'}
                       </button>
                     </div>
                   </form>

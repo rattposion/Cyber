@@ -29,7 +29,11 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.5",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.1.0"
+    "@eslint/config-array": "^1.0.0",
+    "@eslint/object-schema": "^1.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "14.1.0",
+    "glob": "^10.3.10",
+    "rimraf": "^5.0.5"
   }
 }
